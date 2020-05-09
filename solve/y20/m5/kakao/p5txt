@@ -1,0 +1,111 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    static int N;
+	static List<Integer>[] graph;
+	static List<Integer>[] tree;
+	static List<Integer>[] pre;
+	static boolean[] visited;
+	static int count;
+	
+	static class Point{
+		int x, y;
+
+		Point(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}	
+	}
+    public boolean solution(int n, int[][] path, int[][] order) {
+        boolean answer = true;
+        
+        graph = new List[n+1];
+        tree = new List[n+1];
+        pre = new List[n+1];
+        visited = new boolean[n+1];
+        
+        for(int i= 0; i < n+1 ; i++) {
+        	graph[i] = new ArrayList();
+        	tree[i] = new ArrayList();
+        	pre[i] = new ArrayList();
+        }
+        
+        for(int i = 0; i < n-1; i++) {
+        	int from = path[i][0];
+        	int to = path[i][1];
+        	
+        	graph[from].add(to);
+        	graph[to].add(from);
+        }
+        
+        //make_tree
+        make_tree(0, -1);
+      
+        //oder
+        int orderlen = order.length;
+        for(int i = 0; i < orderlen; i++) {
+        	int from = order[i][0];
+        	int to = order[i][1];
+        	
+        	pre[to].add(from);
+        }
+        
+        //check true
+        visited[0] = true;
+        count = n-1;
+        int pre_count = 0;
+        
+        while(count != pre_count) {
+        	pre_count = count;
+
+            check(0);
+        }
+        if(count == 0) {
+        	answer = true;
+        }else {
+        	answer = false;
+        }
+        return answer;
+    }
+    
+    private static void check(int root) {
+		
+		for(int next : tree[root]) {
+			if(visited[next]) {
+				check(next);
+			}else {
+				if(pre[next].isEmpty()) {
+					count--;
+					visited[next] = true;
+					check(next);
+				}else {
+					boolean check_pre = true;
+					for(int pres : pre[next]) {
+						if(!visited[pres]) {
+							check_pre = false;
+							break;
+						}
+					}
+					if(check_pre) {
+						count--;
+						visited[next] = true;
+						check(next);
+					}
+				}
+			}
+		}
+	}
+
+	private static void make_tree(int now, int root) {
+		if(root != -1) {
+			tree[root].add(now);
+		}
+		
+		for(int next : graph[now]) {
+			if(next != root) {
+				make_tree(next, now);
+			}
+		}
+	}
+}
